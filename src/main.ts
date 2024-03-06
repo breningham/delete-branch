@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import * as github from '@actions/github'
 
 /**
  * The main function for the action.
@@ -7,18 +7,25 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const github_token: string = core.getInput('github_token')
+    const repo_owner: string = core.getInput('repo_owner')
+    const repo_name: string = core.getInput('repo_name')
+    const branch_name: string = core.getInput('branch_name')
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const octokit = github.getOctokit(github_token)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    if (branch_name === 'main') {
+      throw new Error('Cannot delete main branch')
+    }
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    core.debug(
+      `==> Deleting branch "${repo_owner}/${repo_name}/heads/${branch_name}"...`
+    )
+    await octokit.rest.git.deleteRef({
+      owner: repo_owner,
+      repo: repo_name,
+      ref: `heads/${branch_name}`
+    })
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
