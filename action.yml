@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'delete-branch'
+description: 'Deletes a branch from a repository'
+author: 'Brendan Ingham <brendan@ingham.dev>'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
@@ -9,15 +9,20 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  github_token:
+    description: 'The GitHub token to use'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  repo_owner:
+    description: 'The owner of the repository'
+    required: true
+    default: ${{ github.repository_owner }}
+  repo_name:
+    description: 'The name of the repository'
+    required: true
+    default: ${{ github.event.repository.name }}
+  branch_name:
+    description: 'The name of the branch to delete'
+    required: true
 
 runs:
   using: node20
